@@ -1,0 +1,17 @@
+Flask
+flask-sqlalchemy
+sqlalchemy_mptt
+flask-login
+itsdangerous
+flask-migrate
+flask-moment
+flak-mail
+flask-httpauth
+flask-script
+pytest
+coverage
+python-dotenv
+psycopg2
+httpie
+flask-redis
+celery

@@ -19,20 +19,20 @@ def save_flowdata(request_args, request_json, districts, faclities):
 
     flowdata = get_indicators_from_rapidpro_results(
         request_json['results'], INDICATORS, report_type)
-    month = flowdata.pop('month')
+    # month = flowdata.pop('month')
     if report_type in ('csfm'):
         year = datetime.now().year
 
-    month_str = "{0}-{1:02}".format(year, MONTHS_DICT[month])
+    month_str = "{0}-{1:02}".format(year, datetime.now().month)
 
     # redis_client.districts set using @app.before_first_request
     ids = districts.get(district)
-    if ids:
-        logger.info(f'Going to save data for district: {district}, station: {station}')
-        district_id = ids['id']
+    if district:
+        logger.info(f'Going to save data for district: {district}, facility: {facility}')
+        district_id = district
         if report_type in ('csfm'):
             logger.info(f'Handling Facility Data for MSISDN: {msisdn}')
-            facility_id = faclities.get(facility)
+            facility_id = facility
 
             db.session.add(FlowData(
                 msisdn=msisdn, district=district_id, facility=facility_id,

@@ -54,8 +54,10 @@ INDICATORS = {
         'attitude', 'cleanliness', 'drugavailability', 'missingdrug', 'suggestion'
     ]
 }
-INDICATORS_WITH_VAL_IN_CATEGORTY = {
-    'csfm': ['satisfied', 'drugavailability']
+INDICATORS_WITH_VALUE_IN_CATEGORTY = {
+    'csfm': [
+        'language', 'satisfied', 'drugavailability', 'cleanliness', 'attitude', 'waitingtime'
+    ]
 }
 
 REPORT_AGGREGATE_INIDICATORS = {
@@ -85,8 +87,36 @@ INDICATOR_THRESHOLD = {
     'suggestion': random.randint(0, 60)
 }
 
+INDICATOR_POSSIBLE_VALUES = {
+    'csfm': {
+        'language': ['English', 'Siswati'],
+        'satisfied': ['Yes', 'No'],
+        'whyunsatisfied': [
+            'There are long queues',
+            'Health workers are slow',
+            'Rude health workers', 'facility is very far'
+        ],
+        'waitingtime': ['Less than 30 mins', '30 mins - 1 hr', '1 hr - 2 hrs', 'More than 2 hrs', 'N/A'],
+        'attitude': ['Very Good', 'Good', 'Average', 'Poor', 'Very Poor'],
+        'cleanliness': ['Very Good', 'Good', 'Average', 'Poor', 'Very Poor'],
+        'drugavailability': ['Yes', 'No'],
+        'missingdrug': [
+            'Paracetamol', 'Lopinavir', 'Tenofovir', 'Nevirapine', 'Zolandolic Acid', 'Duphaston'
+        ],
+        'suggestion': [
+            'Health workers should keep time',
+            'More medicine should be stalked',
+            'There should be more serving stations',
+            'Toilets should be regularly cleaned',
+            'Patients should be given due attention',
+            'The infrastructure should be improved'
+        ]
+    }
+}
+
 INDICATOR_NAME_MAPPING = {
     'satisfied': 'Client Satisfaction',
     'drugavailability': 'Availability of Prescribed Medicine',
+    'missingdrug': 'Missing Drug'
 
 }

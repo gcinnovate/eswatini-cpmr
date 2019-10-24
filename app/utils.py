@@ -1,4 +1,6 @@
-from . import redis_client, db, REPORT_AGGREGATE_INIDICATORS
+from . import (
+    REPORT_AGGREGATE_INIDICATORS, INDICATORS_WITH_VALUE_IN_CATEGORTY
+)
 
 
 def get_indicators_from_rapidpro_results(results_json, indicator_conf={}, report_type=None):
@@ -10,7 +12,7 @@ def get_indicators_from_rapidpro_results(results_json, indicator_conf={}, report
 
     for k, v in results_json.items():
         if k in report_type_indicators:
-            if k == 'month':
+            if k in INDICATORS_WITH_VALUE_IN_CATEGORTY.get(report_type, []):
                 flow_inidicators[k] = results_json[k]['category']
             else:
                 try:

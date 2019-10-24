@@ -13,6 +13,13 @@ def get_flowdata():
     return "Text flow data"
 
 
+@api.route('/kwtranslation', methods=['GET'])
+def kwtranslation():
+    keyword = request.args.get('keyword', '')
+    print(keyword)
+    return jsonify(redis_client.shortnames.get(keyword))
+
+
 @api.route('/flowdata/', methods=['POST'])
 def flowdata_webhook():
 

@@ -34,6 +34,7 @@ class Location(db.Model, BaseNestedSets):
     tree_id = db.Column(db.Integer, db.ForeignKey('locationtree.id'))
     code = db.Column(db.String(64), index=True, unique=True)
     name = db.Column(db.String(64), index=True)
+    iso_id = db.Column(db.String(8), index=True)
 
 
 class Facility(db.Model):
@@ -42,9 +43,17 @@ class Facility(db.Model):
     region_id = db.Column(db.Integer, db.ForeignKey('locations.id'))
     name = db.Column(db.String(64), index=True)
     code = db.Column(db.String(32), index=True)
-    short_name = db.Column(db.String(64), index=True)
     longitude = db.Column(db.String())
     latitude = db.Column(db.String())
+    shortnames = db.relationship('FacilityShortName', back_populates='facility')
+
+
+class FacilityShortName(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    __tablename__ = 'facility_shortnames'
+    facility_id = db.Column(db.Integer, db.ForeignKey('facilities.id'))
+    short_name = db.Column(db.String(64), index=True)
+    facility = db.relationship("Facility", back_populates="shortnames")
 
 
 class FlowData(db.Model, TimeStampMixin):

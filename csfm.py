@@ -9,12 +9,13 @@ from flask_migrate import Migrate, upgrade
 from app import create_app, db, redis_client
 from app.models import (
     Location, LocationTree, Facility, User, Role,
-    FlowData, SummaryCases)
-from datetime import datetime
+    FlowData, SummaryCases, FacilityShortName)
+import datetime
 from flask import current_app
 from sqlalchemy.sql import text
 from getpass import getpass
-from config import INDICATOR_NAME_MAPPING
+from calendar import monthrange
+from config import INDICATOR_NAME_MAPPING, INDICATORS, INDICATOR_POSSIBLE_VALUES
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 if os.path.exists(dotenv_path):
@@ -33,7 +34,7 @@ migrate = Migrate(app, db)
 
 @app.before_first_request
 def before_first_request_func():
-    locs = Location.query.filter_by(level=3).all()
+    locs = Location.query.filter_by(level=2).all()
     districts = {}
     for l in locs:
         districts[l.name] = {'id': l.id, 'parent_id': l.parent_id}
@@ -44,6 +45,15 @@ def before_first_request_func():
     for s in stations:
         facilities[s.name] = s.id
     redis_client.facilities = facilities
+    results = db.engine.execute("SELECT * FROM shortnames_view")
+    shortnames = {}
+    for row in results:
+        shortnames[row.short_name] = {
+            'facility': row.facility,
+            'facility_id': row.facility_id,
+            'region_id': row.region_id
+        }
+    redis_client.shortnames = shortnames
 
     print("This function will run once")
 
@@ -119,14 +129,66 @@ def create_views():
 
 
 @app.cli.command("load_test_data")
-def load_test_data():
-    pass
+@click.option('--report', '-r', default='csfm')
+@click.option('--start-year', '-s', default=2016)
+@click.option('--end-year', '-e', default=2020)
+@click.option('--start-month', '-m', default=1)
+@click.option('--end-month', '-n', default=13)
+@click.option('--limit', '-x', default="yes")  # whether to limit on years to create data for
+def load_test_data(report, start_year, end_year, start_month, end_month, limit):
+    # facilities that have shortnames/keywords
+    facilities = Facility.query.filter(Facility.shortnames.any()).all()
+    year = datetime.datetime.now().year
+    if start_year == end_year:
+        end_year += 1
+    for y in range(start_year, end_year):
+        for m in range(start_month, end_month):
+            if y == year and m > datetime.datetime.now().month - 1:
+                if limit == "yes":
+                    continue
+                else:
+                    pass
+            # loop through the day of the month
+            # get a random number (n) of facilities out of those with keywords (may be 1/2 of them)
+            # generate random data for the n facilities for that day
+            num_days_in_month = monthrange(y, m)[1] # num_days = 28
+            no_of_facilities_with_keywords = len(facilities)
+            for d in range(1, num_days_in_month + 1):
+                for i in range(random.choice(range(no_of_facilities_with_keywords))):  # random number of times
+                    # time message is assumed to be received = created
+                    created = '{0}-{1}-{2} {3}'.format(
+                        y, m, d, random.choice(['12:00', '11:30', '13:20', '10:15', '14:20', '9:00', '8:20']))
+                    month = '{0}-{1:02}'.format(y, m)
+                    year = '{0}'.format(y)
+                    # get a random facility
+                    random_idx = random.choice(range(no_of_facilities_with_keywords))
+                    facility = facilities[random_idx]
+                    # now generate random data
+                    values = {}
+                    for indicator in INDICATORS.get(report, []):
+                        # get a random value for indicator from its possibilities
+                        possible_values_mapping = INDICATOR_POSSIBLE_VALUES.get(report, {})
+                        possible_values = possible_values_mapping.get(indicator, [])
+                        values[indicator] = random.choice(possible_values)
+
+                    print(facility, "=>", created, "=>", values)
+
+                    db.session.add(
+                        FlowData(
+                            created=created, month=month, year=year, facility=facility.id,
+                            report_type=report, district=facility.region_id, values=values))
+                    db.session.commit()
 
 
 @app.cli.command("import-facilities")
 @click.option('--filename', '-f')
 def import_facilities(filename):
     click.echo('Importing facilities')
+
+    locs = Location.query.filter_by(level=2).all()
+    districts = {}
+    for l in locs:
+        districts[l.name] = l.id
 
     wb = load_workbook(filename, read_only=True)
     for sheet in wb:
@@ -144,5 +206,32 @@ def import_facilities(filename):
                 headings = [u'' if i.value is None else str(i.value) for i in row]
             j += 1
 
-    for d in data[:10]:
+    for d in data:
+        if not (d[0] and d[1] and d[2]):
+            click.echo("missing field")
+            continue
+        facility = Facility.query.filter_by(code=d[1]).first()
+        if facility:
+            click.echo("updating faility")
+            facility.name = d[2]
+            facility.region_id = districts[d[0]]
+            for sname in d[3].split(','):
+                shortname_obj = FacilityShortName.query.filter_by(
+                    facility_id=facility.id, short_name=sname).first()
+                if not shortname_obj:
+                    new_shortname_obj = FacilityShortName(facility_id=facility.id, short_name=sname)
+                    db.session.add(new_shortname_obj)
+            facility.short_name = d[3]
+        else:
+            click.echo("adding faility")
+            facility = Facility(region_id=districts[d[0]], code=d[1], name=d[2])
+            db.session.add(facility)
+            for sname in d[3].split(','):
+                if sname:
+                    shortname_obj = FacilityShortName.query.filter_by(
+                        facility_id=facility.id, short_name=sname).first()
+                    if not shortname_obj:
+                        new_shortname_obj = FacilityShortName(facility_id=facility.id, short_name=sname)
+                        db.session.add(new_shortname_obj)
+        db.session.commit()
         print(d)

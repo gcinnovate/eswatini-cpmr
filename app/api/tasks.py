@@ -1,8 +1,9 @@
-from .. import db, celery, INDICATORS
+from .. import db, celery, INDICATORS, RAPIDPRO_API_TOKEN
 from ..models import FlowData, Location
 from ..utils import get_indicators_from_rapidpro_results
 from datetime import datetime
 import calendar
+import requests
 from celery.utils.log import get_task_logger
 
 logger = get_task_logger(__name__)
@@ -28,10 +29,10 @@ def save_flowdata(request_args, request_json, districts, faclities):
     # redis_client.districts set using @app.before_first_request
     ids = districts.get(district)
     if district:
-        logger.info(f'Going to save data for district: {district}, facility: {facility}')
+        # logger.info(f'Going to save data for district: {district}, facility: {facility}')
         district_id = district
         if report_type in ('csfm'):
-            logger.info(f'Handling Facility Data for MSISDN: {msisdn}')
+            # logger.info(f'Handling Facility Data for MSISDN: {msisdn}')
             facility_id = facility
 
             db.session.add(FlowData(
@@ -39,6 +40,16 @@ def save_flowdata(request_args, request_json, districts, faclities):
                 report_type=report_type, month=month_str, year=year, values=flowdata))
             db.session.commit()
 
-        logger.info(f'Done processing flow values')
+        logger.info('Done processing flow values')
     else:
         logger.info("district ids empty")
+
+
+@celery.task(name="tasks.post_request_to_rapidpro")
+def post_request_to_rapidpro(url, data):
+    try:
+        requests.post(url, data, headers={
+            'Content-type': 'application/json',
+            'Authorization': 'Token %s' % RAPIDPRO_API_TOKEN})
+    except:
+        print("Failed to POST request to RapidPro [url: {0}] Data: {1}".format(url, data))

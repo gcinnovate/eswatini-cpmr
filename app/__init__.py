@@ -5,7 +5,9 @@ from flask_sqlalchemy import SQLAlchemy
 from celery import Celery
 from config import (
     config, Config, INDICATORS, REPORT_AGGREGATE_INIDICATORS,
-    INDICATORS_WITH_VALUE_IN_CATEGORTY
+    INDICATORS_WITH_VALUE_IN_CATEGORTY,
+    RAPIDPRO_APIv2_ROOT, CSFM_GENERIC_FLOW_UUID,
+    RAPIDPRO_API_TOKEN
 )
 from flask_login import LoginManager
 from flask_redis import FlaskRedis

@@ -215,23 +215,43 @@ def import_facilities(filename):
             click.echo("updating faility")
             facility.name = d[2]
             facility.region_id = districts[d[0]]
-            for sname in d[3].split(','):
+            shortnames = [x for x in d[3].strip().split(',') if x]
+
+            for sname in shortnames:
                 shortname_obj = FacilityShortName.query.filter_by(
-                    facility_id=facility.id, short_name=sname).first()
+                    facility_id=facility.id, short_name=sname.lower()).first()
                 if not shortname_obj:
-                    new_shortname_obj = FacilityShortName(facility_id=facility.id, short_name=sname)
+                    new_shortname_obj = FacilityShortName(facility_id=facility.id, short_name=sname.lower())
                     db.session.add(new_shortname_obj)
-            facility.short_name = d[3]
+
+            code = d[1].strip()
+            if code:
+                shortname_obj = FacilityShortName.query.filter_by(
+                    facility_id=facility.id, short_name=code.lower()).first()
+                if not shortname_obj:
+                    new_shortname_obj = FacilityShortName(facility_id=facility.id, short_name=code.lower())
+                    db.session.add(new_shortname_obj)
+            # facility.short_name = d[3]
         else:
             click.echo("adding faility")
             facility = Facility(region_id=districts[d[0]], code=d[1], name=d[2])
             db.session.add(facility)
-            for sname in d[3].split(','):
+
+            shortnames = [x for x in d[3].strip().split(',') if x]
+            for sname in d[3].strip().split(','):
                 if sname:
+                    print("SNMAE=>", sname)
                     shortname_obj = FacilityShortName.query.filter_by(
-                        facility_id=facility.id, short_name=sname).first()
+                        facility_id=facility.id, short_name=sname.lower()).first()
                     if not shortname_obj:
-                        new_shortname_obj = FacilityShortName(facility_id=facility.id, short_name=sname)
+                        new_shortname_obj = FacilityShortName(facility_id=facility.id, short_name=sname.lower())
                         db.session.add(new_shortname_obj)
+
+            code = d[1].strip()
+            if code:
+                shortname_obj = FacilityShortName.query.filter_by(
+                    facility_id=facility.id, short_name=code.lower()).first()
+                if not shortname_obj:
+                    new_shortname_obj = FacilityShortName(facility_id=facility.id, short_name=code.lower())
+                    db.session.add(new_shortname_obj)
         db.session.commit()
-        print(d)

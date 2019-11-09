@@ -120,3 +120,12 @@ INDICATOR_NAME_MAPPING = {
     'missingdrug': 'Missing Drug'
 
 }
+
+# RapidPro API root
+RAPIDPRO_APIv2_ROOT = 'http://localhost:8000/api/v2/'
+RAPIDPRO_API_TOKEN = ''
+
+# CSFM generic English flow UUID
+CSFM_GENERIC_FLOW_UUID = ''
+
+from local_config import *

@@ -17,7 +17,7 @@ def get_flowdata():
 def kwtranslation():
     keyword = request.args.get('keyword', '')
     print(keyword)
-    return jsonify(redis_client.shortnames.get(keyword))
+    return jsonify(redis_client.shortnames.get(keyword.lower()))
 
 
 @api.route('/flowdata/', methods=['POST'])

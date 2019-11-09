@@ -2,4 +2,4 @@ from flask import Blueprint
 
 api = Blueprint('api', __name__)
 
-from . import authentication, flowdata, errors
+from . import authentication, flowdata, endpoints, errors

@@ -127,5 +127,7 @@ RAPIDPRO_API_TOKEN = ''
 
 # CSFM generic English flow UUID
 CSFM_GENERIC_FLOW_UUID = ''
-
-from local_config import *
+try:
+    from local_config import *
+except ImportError:
+    pass

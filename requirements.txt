@@ -17,6 +17,7 @@ Flask-Moment==0.8.0
 flask-redis==0.4.0
 Flask-Script==2.0.6
 Flask-SQLAlchemy==2.4.0
+Flask-SSLify
 importlib-metadata==0.18
 itsdangerous==1.1.0
 jdcal==1.4.1
@@ -45,3 +46,5 @@ vine==1.3.0
 wcwidth==0.1.7
 Werkzeug==0.15.4
 zipp==0.5.2
+requests
+Flask-SSLify==0.1.5

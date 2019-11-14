@@ -1,0 +1,2 @@
+ffmpeg -i CSFM\ Video.mp4 -vf scale=1280:-1 -c:v libx264 -preset veryslow -crf 24 output.mp4
+# https://www.ostechnix.com/20-ffmpeg-commands-beginners/

@@ -14,8 +14,8 @@ def start_csfm_flow():
             msisdn = request.args.get('phone', '')
     if request.method == "POST":
         data = request.get_json()
-        code = data.get("code", request.args.get("code", ""))
-        msisdn = data.get('msisdn', request.args.get("msisdn", ""))
+        code = data.get("code", "")
+        msisdn = data.get('msisdn', "")
 
     flow_starts_endpoint = RAPIDPRO_APIv2_ROOT + "flow_starts.json"
     extra_data = redis_client.shortnames.get(code.lower())

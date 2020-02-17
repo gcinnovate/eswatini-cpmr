@@ -65,6 +65,8 @@ def make_shell_context():
 
 @app.teardown_appcontext
 def teardown_db(exception=None):
+    if exception:
+        db.session.rollback()
     db.session.remove()
 
 

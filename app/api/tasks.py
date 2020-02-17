@@ -38,7 +38,10 @@ def save_flowdata(request_args, request_json, districts, faclities):
             db.session.add(FlowData(
                 msisdn=msisdn, district=district_id, facility=facility_id,
                 report_type=report_type, month=month_str, year=year, values=flowdata))
-            db.session.commit()
+            try:
+                db.session.commit()
+            except:
+                db.session.rollback()
 
         logger.info('Done processing flow values')
     else:

@@ -1,5 +1,5 @@
 from flask import jsonify, request
-# from .. import db, INDICATORS
+from .. import db
 # from ..models import FlowData, Permission
 from . import api
 # from .decorators import permission_required
@@ -17,7 +17,23 @@ def get_flowdata():
 def kwtranslation():
     keyword = request.args.get('keyword', '')
     print(keyword)
-    return jsonify(redis_client.shortnames.get(keyword.lower()))
+    ret = redis_client.shortnames.get(keyword.lower())
+    if ret:
+        return jsonify(ret)
+    res = db.engine.execute(
+        "SELECT facility, region_id, facility_id FROM shortnames_view WHERE short_name = '{0}'".format(
+            keyword.lower()))
+    if res:
+        try:
+            row = res[0]
+            ret = {
+                'facility': row.facility,
+                'facility_id': row.facility_id,
+                'region_id': row.region_id
+            }
+            return jsonify(ret)
+        except:
+            return jsonify({})
 
 
 @api.route('/flowdata/', methods=['POST'])

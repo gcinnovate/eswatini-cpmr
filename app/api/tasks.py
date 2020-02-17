@@ -17,6 +17,7 @@ def save_flowdata(request_args, request_json, districts, faclities):
     report_type = request_args.get('report_type')
     facility = request_args.get('facility')
     district = request_args.get('district')
+    keyword = request_args.get('keyword')
 
     flowdata = get_indicators_from_rapidpro_results(
         request_json['results'], INDICATORS, report_type)
@@ -41,6 +42,7 @@ def save_flowdata(request_args, request_json, districts, faclities):
             try:
                 db.session.commit()
             except:
+                logger.info("FAILED TO SAVE: [MSISDN:{0}, Keyword: {1}, Facility: {2}]".format(msisdn, keyword, facility))
                 db.session.rollback()
 
         logger.info('Done processing flow values')

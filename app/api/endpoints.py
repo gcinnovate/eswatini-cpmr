@@ -1,8 +1,9 @@
 import json
 from flask import jsonify, request
 from . import api
-from .. import redis_client, RAPIDPRO_APIv2_ROOT, CSFM_GENERIC_FLOW_UUID
+from .. import redis_client, RAPIDPRO_APIv2_ROOT, CSFM_GENERIC_FLOW_UUIDS
 from .tasks import post_request_to_rapidpro
+import random
 
 
 @api.route('/start_csfm_flow', methods=['GET', 'POST'])
@@ -16,13 +17,14 @@ def start_csfm_flow():
         data = request.get_json()
         code = data.get("code", "")
         msisdn = data.get('msisdn', "")
+        extra = data.get("extra", {})
 
     flow_starts_endpoint = RAPIDPRO_APIv2_ROOT + "flow_starts.json"
     extra_data = redis_client.shortnames.get(code.lower())
     if not extra_data:
         extra_data = {}
     params = {
-        'flow': CSFM_GENERIC_FLOW_UUID,
+        'flow': random.choice(CSFM_GENERIC_FLOW_UUIDS),
         'urns': ["tel:{0}".format(msisdn.strip())],
         'extra': extra_data
     }

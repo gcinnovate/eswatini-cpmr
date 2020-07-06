@@ -132,6 +132,7 @@ RAPIDPRO_API_TOKEN = ''
 
 # CSFM generic English flow UUID
 CSFM_GENERIC_FLOW_UUID = ''
+CSFM_GENERIC_FLOW_UUIDS = ['', '']
 try:
     from local_config import *
 except ImportError:

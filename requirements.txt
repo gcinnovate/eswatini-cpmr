@@ -21,7 +21,7 @@ Flask-SSLify
 importlib-metadata==0.18
 itsdangerous==1.1.0
 jdcal==1.4.1
-Jinja2==2.10.1
+Jinja2==2.11.3
 kombu==4.6.3
 Mako==1.0.13
 MarkupSafe==1.1.1
